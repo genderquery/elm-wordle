@@ -1,0 +1,138 @@
+:root {
+  --color-present: rgb(201, 180, 88);
+  --color-absent: rgb(120, 124, 126);
+  --color-correct: rgb(106, 170, 100);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "sans-serif";
+  padding: 1rem;
+}
+
+.container {
+  margin: 1rem auto;
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: -10px; /* offset for row gap */
+}
+
+.board__row {
+  display: flex;
+  flex: 1; /* stretch to fill height */
+  margin-top: 0.5rem; /* row gap */
+  margin-left: -0.5rem; /* offset for column gap */
+  justify-content: center;
+}
+
+.board__tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px; /* column gap */
+  border: 2px solid gray;
+  font-weight: bold;
+  user-select: none; /* prevent text selection */
+  width: 100%;
+  font-size: 2em;
+  max-width: 4rem;
+  text-transform: uppercase;
+  color: white;
+}
+
+/* keep square shape */
+.board__tile::before {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+
+/* TODO check contrast */
+/* TODO make colors accessible */
+
+.board__tile--empty {
+  border: 2px solid lightgray;
+}
+
+.board__tile--input {
+  color: black
+}
+
+
+.board__tile--absent {
+  background: dimgray;
+  color: white;
+}
+
+.board__tile--present {
+  background: goldenrod;
+  color: white;
+}
+
+.board__tile--correct {
+  background: olivedrab;
+  color: white;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+}
+
+.keyboard__row {
+  display: flex;
+  flex: 1;
+  margin-top: 0.5rem;
+  margin-left: -0.5rem;
+}
+
+.keyboard__key {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-left: 0.5rem;
+  min-height: 3rem;
+  border-radius: 0.25rem;
+  border: none;
+  text-transform: uppercase;
+}
+
+.keyboard__key--half {
+  flex: 0.5;
+  border: none;
+}
+
+.keyboard__key--one-and-a-half {
+  flex: 1.5;
+}
+
+.keyboard__key--absent {
+  background: dimgray;
+  color: white;
+}
+
+.keyboard__key--present {
+  background: goldenrod;
+  color: white;
+}
+
+.keyboard__key--correct {
+  background: olivedrab;
+  color: white;
+}
