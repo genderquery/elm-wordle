@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build": "elm make src/Main.elm --optimize --output main.js",
     "start": "elm-live src/Main.elm --hot -- --debug --output=main.js",
     "test": "elm-test"
   },

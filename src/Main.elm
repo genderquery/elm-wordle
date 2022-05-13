@@ -3,15 +3,14 @@ module Main exposing (main)
 import Browser
 import Browser.Events
 import Game
-import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (class, classList)
+import Html exposing (Html, a, button, div, input, text)
+import Html.Attributes exposing (class, href)
 import Html.Attributes.Extra
 import Html.Events exposing (onClick)
-import Html.Extra
 import Json.Decode as Decode
-import List.Extra
+import Json.Encode exposing (string)
 import Random
-import Words exposing (random)
+import Words
 
 
 
@@ -61,7 +60,7 @@ type Model
 
 init : flags -> ( Model, Cmd Msg )
 init _ =
-    ( Loading, newWord )
+    ( Loading, newGame )
 
 
 
@@ -74,26 +73,21 @@ type Msg
     | NewGame
 
 
-newGame : String -> ( Model, Cmd Msg )
-newGame goal =
-    ( Guessing
-        { goal = goal
-        , input = ""
-        , guesses = []
-        , message = ""
-        }
-    , Cmd.none
-    )
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( model, msg ) of
         ( _, NewGame ) ->
-            ( model, newWord )
+            ( model, newGame )
 
         ( _, NewWord (Just word) ) ->
-            newGame word
+            ( Guessing
+                { goal = word
+                , input = ""
+                , guesses = []
+                , message = ""
+                }
+            , Cmd.none
+            )
 
         ( Guessing ({ input } as data), KeyPressed "Backspace" ) ->
             ( Guessing
@@ -143,6 +137,12 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        ( Won _, KeyPressed "Enter" ) ->
+            ( model, newGame )
+
+        ( Lost _, KeyPressed "Enter" ) ->
+            ( model, newGame )
+
         _ ->
             ( model, Cmd.none )
 
@@ -157,8 +157,8 @@ isKeyALetter key =
             False
 
 
-newWord : Cmd Msg
-newWord =
+newGame : Cmd Msg
+newGame =
     Random.generate NewWord Words.random
 
 
@@ -188,37 +188,35 @@ view model =
 
         Guessing ({ message } as data) ->
             div [ class "container" ]
-                [ div [] [ text message ]
-                , board data
+                [ board data
+                , div [ class "message" ] [ text message ]
                 , keyboard data
                 ]
 
-        Won ({ goal } as data) ->
+        Won data ->
             div [ class "container" ]
-                [ gameOver "You Won!"
-                , board data
+                [ board data
+                , gameOver "You Won!"
                 , keyboard data
                 ]
 
         Lost ({ goal } as data) ->
             div [ class "container" ]
-                [ gameOver "You Lost!"
-                , board data
+                [ board data
+                , gameOver ("The word was " ++ goal ++ ".")
                 , keyboard data
                 ]
 
 
 gameOver : String -> Html Msg
 gameOver message =
-    div []
-        [ div [] [ text message ]
-        , div []
-            [ button [ class "keyboard__key", onClick NewGame ]
-                [ text "Play again" ]
-            ]
+    div [ class "message" ]
+        [ text (message ++ " ")
+        , a [ href "", onClick NewGame ] [ text "Play again." ]
         ]
 
 
+classNameForStatus : Game.Status -> String
 classNameForStatus status =
     case status of
         Game.Correct ->

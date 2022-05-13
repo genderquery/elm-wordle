@@ -73,17 +73,17 @@ body {
 
 
 .board__tile--absent {
-  background: dimgray;
+  background: var(--color-absent);
   color: white;
 }
 
 .board__tile--present {
-  background: goldenrod;
+  background: var(--color-present);
   color: white;
 }
 
 .board__tile--correct {
-  background: olivedrab;
+  background: var(--color-correct);
   color: white;
 }
 
@@ -123,16 +123,22 @@ body {
 }
 
 .keyboard__key--absent {
-  background: dimgray;
+  background: var(--color-absent);
   color: white;
 }
 
 .keyboard__key--present {
-  background: goldenrod;
+  background: var(--color-present);
   color: white;
 }
 
 .keyboard__key--correct {
-  background: olivedrab;
+  background: var(--color-correct);
   color: white;
+}
+
+.message {
+  text-align: center;
+  margin-top: 1.5rem;
+  height: 1em;
 }
