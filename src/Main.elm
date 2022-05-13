@@ -108,12 +108,10 @@ update msg model =
                     }
             in
             if String.length input < wordLength then
-                -- TODO show error message
-                ( Guessing { data | message = "Not long enough" }, Cmd.none )
+                ( Guessing { data | message = "That word is not long enough." }, Cmd.none )
 
             else if not (Words.isValid input) then
-                -- TODO show error message
-                ( Guessing { data | message = "Not a valid word" }, Cmd.none )
+                ( Guessing { data | message = "That is not a valid word." }, Cmd.none )
 
             else if input == goal then
                 ( Won addGuess, Cmd.none )
@@ -211,9 +209,7 @@ view model =
 gameOver : String -> Html Msg
 gameOver message =
     div [ class "message" ]
-        [ text (message ++ " ")
-        , a [ href "", onClick NewGame ] [ text "Play again." ]
-        ]
+        [ text (message ++ " Press ENTER to start a new game.") ]
 
 
 classNameForStatus : Game.Status -> String
