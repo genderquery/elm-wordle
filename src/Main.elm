@@ -4,12 +4,13 @@ import Browser
 import Browser.Events
 import Game
 import Html exposing (Html, a, button, div, input, text)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class, classList, href)
 import Html.Attributes.Extra
 import Html.Events exposing (onClick)
 import Json.Decode as Decode
 import Json.Encode exposing (string)
 import Random
+import Util exposing (replaceAt)
 import Words
 
 
@@ -48,6 +49,7 @@ type alias Data =
     , input : String
     , guesses : List String
     , message : String
+    , position : Int
     }
 
 
@@ -71,6 +73,7 @@ type Msg
     = KeyPressed String
     | NewWord (Maybe String)
     | NewGame
+    | SetPosition Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -82,17 +85,19 @@ update msg model =
         ( _, NewWord (Just word) ) ->
             ( Guessing
                 { goal = word
-                , input = ""
+                , input = String.repeat wordLength " "
                 , guesses = []
                 , message = ""
+                , position = 0
                 }
             , Cmd.none
             )
 
-        ( Guessing ({ input } as data), KeyPressed "Backspace" ) ->
+        ( Guessing ({ input, position } as data), KeyPressed "Backspace" ) ->
             ( Guessing
                 { data
-                    | input = String.dropRight 1 input
+                    | input = replaceAt position ' ' input
+                    , position = max 0 (position - 1)
                     , message = ""
                 }
             , Cmd.none
@@ -102,8 +107,9 @@ update msg model =
             let
                 addGuess =
                     { data
-                        | input = ""
+                        | input = String.repeat wordLength " "
                         , guesses = guesses ++ [ input ]
+                        , position = 0
                         , message = ""
                     }
             in
@@ -122,18 +128,20 @@ update msg model =
             else
                 ( Guessing addGuess, Cmd.none )
 
-        ( Guessing ({ input } as data), KeyPressed key ) ->
-            if isKeyALetter key && String.length input < wordLength then
-                ( Guessing
-                    { data
-                        | input = input ++ key
-                        , message = ""
-                    }
-                , Cmd.none
-                )
+        ( Guessing ({ input, position } as data), KeyPressed key ) ->
+            case keyMaybeAlpha key of
+                Just char ->
+                    ( Guessing
+                        { data
+                            | input = replaceAt position char input
+                            , position = min (wordLength - 1) (position + 1)
+                            , message = ""
+                        }
+                    , Cmd.none
+                    )
 
-            else
-                ( model, Cmd.none )
+                _ ->
+                    ( model, Cmd.none )
 
         ( Won _, KeyPressed "Enter" ) ->
             ( model, newGame )
@@ -141,18 +149,25 @@ update msg model =
         ( Lost _, KeyPressed "Enter" ) ->
             ( model, newGame )
 
+        ( Guessing data, SetPosition newPosition ) ->
+            ( Guessing { data | position = newPosition }, Cmd.none )
+
         _ ->
             ( model, Cmd.none )
 
 
-isKeyALetter : String -> Bool
-isKeyALetter key =
+keyMaybeAlpha : String -> Maybe Char
+keyMaybeAlpha key =
     case String.uncons key of
         Just ( char, "" ) ->
-            Char.isAlpha char
+            if Char.isAlpha char then
+                Just char
+
+            else
+                Nothing
 
         _ ->
-            False
+            Nothing
 
 
 newGame : Cmd Msg
@@ -226,7 +241,7 @@ classNameForStatus status =
 
 
 board : Data -> Html Msg
-board { goal, input, guesses } =
+board { goal, input, guesses, position } =
     let
         rows =
             if List.length guesses < allowedGuesses then
@@ -260,12 +275,16 @@ board { goal, input, guesses } =
 
         inputRow =
             div [ class "board__row" ]
-                (List.map inputTile (String.toList input)
-                    ++ List.repeat (wordLength - String.length input) (inputTile ' ')
-                )
+                (List.indexedMap inputTile (String.toList input))
 
-        inputTile char =
-            div [ class "board__tile board__tile--input" ]
+        inputTile index char =
+            div
+                [ class "board__tile board__tile--input"
+                , classList
+                    [ ( "board__tile board__tile--cursor", index == position )
+                    ]
+                , onClick (SetPosition index)
+                ]
                 [ text (String.fromChar char) ]
     in
     div [ class "board" ] rows

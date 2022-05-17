@@ -72,6 +72,10 @@ body {
   color: black;
 }
 
+.board__tile--cursor {
+  border: 2px solid black;
+}
+
 .board__tile--absent {
   background: var(--color-absent);
   color: white;

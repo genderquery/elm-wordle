@@ -4,17 +4,6 @@ import Expect
 import Game exposing (..)
 import Test exposing (..)
 
-
-
-{--
-RUSTY AAAAC
-PINEY AACAC
-MANLY ACCAC
-CANDY CCCAC
-CANNY CCCCC
---}
-
-
 suite : Test
 suite =
     describe "The Game module"
